@@ -40,8 +40,7 @@ jobs:
 
       - name: Enable ccache
         run: |
-          echo 'export CCACHE_DIR=${HOME}/.ccache' >> $GITHUB_ENV
-          echo 'export CCACHE_MAXSIZE=500M' >> $GITHUB_ENV
+          echo 'export BR2_CCACHE_DIR=${HOME}/.ccache' >> $GITHUB_ENV
 
       - name: Build Buildroot (parallel)
         working-directory: buildroot
