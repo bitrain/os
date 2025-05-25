@@ -48,10 +48,12 @@ jobs:
           echo 'export PATH="/usr/lib/ccache:$PATH"' >> $GITHUB_ENV
 
       - name: Build Buildroot (parallel)
+        working-directory: buildroot
         env:
           CCACHE_DIR: ~/.ccache
         run: |
-          make BR2_JLEVEL=$(nproc) -C buildroot BR2_EXTERNAL=../buildroot-external rpi4_64_defconfig
+          make BR2_EXTERNAL=../buildroot-external rpi4_64_defconfig
+          make BR2_JLEVEL=$(nproc)
 
       - name: Upload output image
         uses: actions/upload-artifact@v4
