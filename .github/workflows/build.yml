@@ -43,30 +43,15 @@ jobs:
 
       - name: Enable ccache
         run: |
-          echo 'export BR2_CCACHE=y' >> buildroot/.config
           echo 'export CCACHE_DIR=${HOME}/.ccache' >> $GITHUB_ENV
           echo 'export CCACHE_MAXSIZE=500M' >> $GITHUB_ENV
           echo 'export PATH="/usr/lib/ccache:$PATH"' >> $GITHUB_ENV
 
-      - name: Set Buildroot config
-        working-directory: buildroot
-        run: make raspberrypi4_64_defconfig
-
-      - name: Enable external toolchain (Linaro ARM64)
-        working-directory: buildroot
-        run: |
-          make menuconfig <<EOF
-          BR2_TOOLCHAIN_EXTERNAL=y
-          BR2_TOOLCHAIN_EXTERNAL_LINARO_AARCH64=y
-          EOF
-
       - name: Build Buildroot (parallel)
-        working-directory: buildroot
         env:
           CCACHE_DIR: ~/.ccache
-          BR2_CCACHE: y
         run: |
-          make BR2_JLEVEL=$(nproc)
+          make BR2_JLEVEL=$(nproc) -C buildroot BR2_EXTERNAL=./external rpi_4b_64
 
       - name: Upload output image
         uses: actions/upload-artifact@v4
