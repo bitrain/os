@@ -51,7 +51,7 @@ jobs:
         env:
           CCACHE_DIR: ~/.ccache
         run: |
-          make BR2_JLEVEL=$(nproc) -C buildroot BR2_EXTERNAL=../external rpi_4b_64
+          make BR2_JLEVEL=$(nproc) -C buildroot BR2_EXTERNAL=../buildroot-external rpi_4b_64
 
       - name: Upload output image
         uses: actions/upload-artifact@v4
