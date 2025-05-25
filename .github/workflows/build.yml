@@ -15,38 +15,58 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Cache Buildroot download folder (dl/)
+        uses: actions/cache@v4
+        with:
+          path: buildroot/dl
+          key: buildroot-dl-${{ hashFiles('buildroot/**') }}
+          restore-keys: |
+            buildroot-dl-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ hashFiles('buildroot/**') }}
+          restore-keys: |
+            ccache-
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential \
-            bc \
-            bison \
-            flex \
-            gettext \
-            libncurses5-dev \
-            libssl-dev \
-            python3 \
-            unzip \
-            wget \
-            rsync \
-            file \
-            cpio \
-            python3-pyelftools \
-            git \
-            make \
-            gcc \
-            g++ \
-            tar \
-            xz-utils
+            build-essential bc bison flex gettext \
+            libncurses5-dev libssl-dev python3 unzip \
+            wget rsync file cpio python3-pyelftools \
+            git make gcc g++ tar xz-utils \
+            ccache
+
+      - name: Enable ccache
+        run: |
+          echo 'export BR2_CCACHE=y' >> buildroot/.config
+          echo 'export CCACHE_DIR=${HOME}/.ccache' >> $GITHUB_ENV
+          echo 'export CCACHE_MAXSIZE=500M' >> $GITHUB_ENV
+          echo 'export PATH="/usr/lib/ccache:$PATH"' >> $GITHUB_ENV
 
       - name: Set Buildroot config
         working-directory: buildroot
         run: make raspberrypi4_64_defconfig
 
-      - name: Build Buildroot
+      - name: Enable external toolchain (Linaro ARM64)
         working-directory: buildroot
-        run: make
+        run: |
+          make menuconfig <<EOF
+          BR2_TOOLCHAIN_EXTERNAL=y
+          BR2_TOOLCHAIN_EXTERNAL_LINARO_AARCH64=y
+          EOF
+
+      - name: Build Buildroot (parallel)
+        working-directory: buildroot
+        env:
+          CCACHE_DIR: ~/.ccache
+          BR2_CCACHE: y
+        run: |
+          make BR2_JLEVEL=$(nproc)
 
       - name: Upload output image
         uses: actions/upload-artifact@v4
