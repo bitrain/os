@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: buildroot/dl
-          key: buildroot-dl-${{ hashFiles('buildroot/**') }}
+          key: buildroot-dl-cache-v1
           restore-keys: |
             buildroot-dl-
 
@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.ccache
-          key: ccache-${{ hashFiles('buildroot/**') }}
+          key: ccache-cache-v1
           restore-keys: |
             ccache-
 
